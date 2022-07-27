@@ -1,19 +1,34 @@
 import React, { Component } from "react";
 import { getFoods } from "../services/fakeFoodService";
-import Favourite from "./Favourite";
+import Favorite from "./common/Favorite";
+import Pagination from "./common/Pagination";
 
 class Foods extends Component {
   state = {
     foods: getFoods(),
+    pageSize: 4,
+    selectedPage: 1,
   };
 
+  handleFavor = (food) => {
+    const foods = [...this.state.foods];
+    const index = foods.indexOf(food);
+    foods[index] = { ...food };
+    foods[index].isFavorite = !foods[index].isFavorite;
+    this.setState({ foods });
+  };
+
+  handlePageChange = (page) => this.setState({ selectedPage: page });
+
   render() {
-    if (this.state.foods.length === 0)
-      return <p>There are no foods in the database.</p>;
+    const { pageSize, selectedPage } = this.state;
+    const { length: count } = this.state.foods;
+
+    if (count === 0) return <p>There are no foods in the database.</p>;
 
     return (
       <>
-        <p>Showing {this.state.foods.length} foods in the database.</p>
+        <p>Showing {count} foods in the database.</p>
         <table className="table">
           <thead>
             <tr>
@@ -33,7 +48,10 @@ class Foods extends Component {
                 <td>{food.numberInStock}</td>
                 <td>{food.price}</td>
                 <td>
-                  <Favourite />
+                  <Favorite
+                    onFavor={() => this.handleFavor(food)}
+                    isFavorite={food.isFavorite}
+                  />
                 </td>
                 <td>
                   <button
@@ -47,6 +65,12 @@ class Foods extends Component {
             ))}
           </tbody>
         </table>
+        <Pagination
+          itemCount={count}
+          pageSize={pageSize}
+          selectedPage={selectedPage}
+          onPageChange={this.handlePageChange}
+        />
       </>
     );
   }
