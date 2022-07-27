@@ -1,4 +1,5 @@
 import React from "react";
+import _ from "lodash";
 
 function Pagination(props) {
   const { itemCount, pageSize, selectedPage, onPageChange } = props;
@@ -6,7 +7,7 @@ function Pagination(props) {
 
   if (pageCount === 1) return null;
 
-  const pages = range(1, pageCount);
+  const pages = _.range(1, pageCount + 1);
 
   return (
     <ul className="pagination">
@@ -25,11 +26,3 @@ function Pagination(props) {
 }
 
 export default Pagination;
-
-function range(start, end) {
-  const result = [];
-
-  for (let i = start; i <= end; i++) result.push(i);
-
-  return result;
-}
