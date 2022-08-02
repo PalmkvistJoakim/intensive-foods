@@ -5,7 +5,7 @@ function ListGroup({ items, selectedItem, onItemSelect }) {
     <ul className="list-group">
       {items.map((item) => (
         <li
-          ket={item._id}
+          key={item._id}
           style={{ cursor: "pointer" }}
           className={
             item === selectedItem ? "list-group-item active" : "list-group-item"
