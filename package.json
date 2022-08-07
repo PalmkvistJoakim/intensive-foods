@@ -2,7 +2,7 @@
   "name": "intensive-foods",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://PalmkvistJoakim.github.io/intensive-foods",
+  "homepage": "https://PalmkvistJoakim.github.io/",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.1.1",
     "@testing-library/jest-dom": "^5.16.4",
