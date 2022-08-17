@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import _ from "lodash";
+import { Link } from "react-router-dom";
 import { getCategories } from "../services/fakeCategoryService";
-import { getFoods } from "../services/fakeFoodService";
+import { deleteFood, getFoods } from "../services/fakeFoodService";
 import { paginate } from "../utils/paginate";
 import ListGroup from "./common/ListGroup";
 import Pagination from "./common/Pagination";
 import FoodsTable from "./FoodsTable";
+import SearchBox from "./SearchBox";
 
 const DEFAULT_CATEGORY = { _id: "", name: "All categories" };
 
@@ -15,6 +17,7 @@ class Foods extends Component {
     categories: [],
     pageSize: 4,
     selectedPage: 1,
+    searchQuery: "",
     selectedCategory: DEFAULT_CATEGORY,
     sortColumn: { path: "name", order: "asc" },
   };
@@ -32,25 +35,47 @@ class Foods extends Component {
     this.setState({ foods });
   };
 
+  handleDelete = (food) => {
+    const foods = this.state.foods.filter((f) => f._id !== food._id);
+    this.setState({ foods });
+    deleteFood(food._id);
+  };
+
+  handleSearch = (searchQuery) =>
+    this.setState({ searchQuery, selectedCategory: DEFAULT_CATEGORY });
+
   handleSort = (sortColumn) => this.setState({ sortColumn });
 
   handlePageChange = (page) => this.setState({ selectedPage: page });
 
   handleCategorySelect = (category) =>
-    this.setState({ selectedCategory: category, selectedPage: 1 });
+    this.setState({
+      selectedCategory: category,
+      selectedPage: 1,
+      searchQuery: "",
+    });
 
   getPaginatedFoods() {
     const {
       pageSize,
       selectedPage,
+      searchQuery,
       selectedCategory,
       sortColumn,
       foods: allFoods,
     } = this.state;
 
-    const filteredFoods = selectedCategory._id
-      ? allFoods.filter((f) => f.category._id === selectedCategory._id)
-      : allFoods;
+    let filteredFoods = allFoods;
+
+    if (selectedCategory._id) {
+      filteredFoods = allFoods.filter(
+        (f) => f.category._id === selectedCategory._id
+      );
+    } else if (searchQuery) {
+      filteredFoods = allFoods.filter((f) =>
+        f.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
     const sortedFoods = _.orderBy(
       filteredFoods,
@@ -63,11 +88,16 @@ class Foods extends Component {
     return { foods, filteredCount: filteredFoods.length };
   }
 
+  renderButton(label) {
+    return <button className="btn btn-primary mb-3">{label}</button>;
+  }
+
   render() {
     const {
       pageSize,
       selectedPage,
       selectedCategory,
+      searchQuery,
       categories,
       sortColumn,
       foods: allFoods,
@@ -88,7 +118,11 @@ class Foods extends Component {
           />
         </div>
         <div className="col">
+          <Link className="btn btn-primary mb-3" to="/foods/new">
+            New Food
+          </Link>
           <p>Showing {filteredCount} foods in the database.</p>
+          <SearchBox value={searchQuery} onChange={this.handleSearch} />
           <FoodsTable
             foods={foods}
             onFavor={this.handleFavor}
@@ -106,11 +140,6 @@ class Foods extends Component {
       </div>
     );
   }
-
-  handleDelete = (food) => {
-    const foods = this.state.foods.filter((f) => f._id !== food._id);
-    this.setState({ foods });
-  };
 }
 
 export default Foods;

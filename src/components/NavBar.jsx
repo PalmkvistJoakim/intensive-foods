@@ -1,13 +1,15 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 
 function NavBar(props) {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
-        <a className="navbar-brand">Intensive Foods</a>
-        <div className="navbar-collapse">
-          <ul className="navbar-nav">
+        <Link className="navbar-brand" to="/">
+          Intensive Foods
+        </Link>
+        <div className="collapse navbar-collapse">
+          <div className="navbar-nav">
             <NavLink className="nav-link" to="/">
               Foods
             </NavLink>
@@ -17,7 +19,13 @@ function NavBar(props) {
             <NavLink className="nav-link" to="/orders">
               Orders
             </NavLink>
-          </ul>
+            <NavLink className="nav-link" to="/login">
+              Login
+            </NavLink>
+            <NavLink className="nav-link" to="/register">
+              Register
+            </NavLink>
+          </div>
         </div>
       </div>
     </nav>
