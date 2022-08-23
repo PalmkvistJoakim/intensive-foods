@@ -1,50 +1,74 @@
 import React from "react";
+import axios from "axios";
 import Joi from "joi";
 import Form from "./common/Form";
-import { getCategories } from "../services/fakeCategoryService";
-import { getFood, saveFood } from "../services/fakeFoodService";
 
 class FoodForm extends Form {
   state = {
-    data: { _id: "", name: "", categoryId: "", numberInStock: "", price: "" },
+    data: {
+      _id: "",
+      name: "",
+      categoryId: "",
+      numberInStock: "",
+      price: "",
+    },
     errors: {},
     categories: [],
   };
 
   schema = Joi.object({
-    _id: Joi.string().allow(""),
+    _id: Joi.allow(""),
     name: Joi.string().required().label("Name"),
     categoryId: Joi.string().required().label("Category"),
     numberInStock: Joi.number().required().min(0).max(100).label("Stock"),
     price: Joi.number().required().min(0).max(10).label("Price"),
   });
 
-  componentDidMount() {
-    const categories = getCategories();
+  async componentDidMount() {
+    const { data: categories } = await axios.get(
+      "http://localhost:8000/api/categories"
+    );
     this.setState({ categories });
 
-    const foodId = this.props.match.params.id;
-    if (foodId === "new") return;
+    const id = this.props.match.params.id;
+    if (id === "new") return;
 
-    const food = getFood(foodId);
-    if (!food) return this.props.history.replace("/not-found");
+    const { data } = await axios.get(`http://localhost:8000/api/foods/${id}`);
+    if (!data) return this.props.history.replace("/not-found");
 
-    this.setState({ data: this.mapToViewModel(food) });
+    this.setState({ data: this.mapToViewModel(data) });
   }
 
-  mapToViewModel(food) {
+  mapToViewModel(data) {
     return {
-      _id: food._id,
-      name: food.name,
-      categoryId: food.category._id,
-      numberInStock: food.numberInStock,
-      price: food.price,
+      _id: data._id,
+      name: data.name,
+      categoryId: data.category._id,
+      numberInStock: data.numberInStock,
+      price: data.price,
     };
   }
 
-  doSubmit = () => {
-    saveFood(this.state.data);
-    this.props.history.push("/foods");
+  database(data) {
+    return {
+      name: data.name,
+      categoryId: data.categoryId,
+      numberInStock: data.numberInStock,
+      price: data.price,
+    };
+  }
+
+  doSubmit = async () => {
+    const data = this.database(this.state.data);
+    if (this.state.data._id) {
+      await axios.put(
+        `http://localhost:8000/api/foods/${this.state.data._id}`,
+        data
+      );
+    } else {
+      await axios.post("http://localhost:8000/api/foods", data);
+    }
+    return this.props.history.push("/foods");
   };
 
   render() {

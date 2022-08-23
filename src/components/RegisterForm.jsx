@@ -1,6 +1,7 @@
 import React from "react";
 import Joi from "joi";
 import Form from "./common/Form";
+import httpService from "../services/httpService";
 
 class RegisterForm extends Form {
   state = {
@@ -17,9 +18,14 @@ class RegisterForm extends Form {
     name: Joi.string().allow("").label("Name"),
   });
 
-  doSubmit = () => {
-    console.log("REGISTRERA");
-  };
+  // doSubmit = async () => {
+  //   const data = {
+  //     name: this.state.name,
+  //     email: this.state.username,
+  //     password: this.state.password,
+  //   };
+  //   await http.post("http://localhost:8000/api/users", data);
+  // };
 
   render() {
     return (

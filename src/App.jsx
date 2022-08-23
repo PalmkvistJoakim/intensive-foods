@@ -4,7 +4,6 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Customers from "./components/Customers";
 import Orders from "./components/Orders";
-import NotFound from "./components/NotFound";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import FoodForm from "./components/FoodForm";

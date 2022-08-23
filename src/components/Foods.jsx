@@ -1,8 +1,7 @@
 import React, { Component } from "react";
+import axios from "axios";
 import _ from "lodash";
 import { Link } from "react-router-dom";
-import { getCategories } from "../services/fakeCategoryService";
-import { deleteFood, getFoods } from "../services/fakeFoodService";
 import { paginate } from "../utils/paginate";
 import ListGroup from "./common/ListGroup";
 import Pagination from "./common/Pagination";
@@ -22,9 +21,12 @@ class Foods extends Component {
     sortColumn: { path: "name", order: "asc" },
   };
 
-  componentDidMount() {
-    const categories = [DEFAULT_CATEGORY, ...getCategories()];
-    this.setState({ foods: getFoods(), categories });
+  async componentDidMount() {
+    const { data: foods } = await axios.get("http://localhost:8000/api/foods");
+    const { data: categories } = await axios.get(
+      "http://localhost:8000/api/categories"
+    );
+    this.setState({ categories: [DEFAULT_CATEGORY, ...categories], foods });
   }
 
   handleFavor = (food) => {
@@ -35,10 +37,10 @@ class Foods extends Component {
     this.setState({ foods });
   };
 
-  handleDelete = (food) => {
+  handleDelete = async (food) => {
     const foods = this.state.foods.filter((f) => f._id !== food._id);
     this.setState({ foods });
-    deleteFood(food._id);
+    await axios.delete(`http://localhost:8000/api/foods/${food._id}`);
   };
 
   handleSearch = (searchQuery) =>
