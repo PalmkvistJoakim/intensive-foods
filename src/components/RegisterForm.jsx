@@ -1,7 +1,7 @@
 import React from "react";
 import Joi from "joi";
 import Form from "./common/Form";
-import httpService from "../services/httpService";
+import user from "../services/userService";
 
 class RegisterForm extends Form {
   state = {
@@ -18,14 +18,18 @@ class RegisterForm extends Form {
     name: Joi.string().allow("").label("Name"),
   });
 
-  // doSubmit = async () => {
-  //   const data = {
-  //     name: this.state.name,
-  //     email: this.state.username,
-  //     password: this.state.password,
-  //   };
-  //   await http.post("http://localhost:8000/api/users", data);
-  // };
+  doSubmit = async () => {
+    try {
+      const { headers } = await user.register(this.state.data);
+      localStorage.setItem("token", headers["x-auth-token"]);
+      window.location = "/";
+    } catch (error) {
+      if (error.response.status === 400) {
+        const errors = { username: error.response.data };
+        this.setState({ errors });
+      }
+    }
+  };
 
   render() {
     return (

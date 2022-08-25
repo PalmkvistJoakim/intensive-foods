@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import axios from "axios";
+import http from "../services/httpService";
+import config from "../services/config.json";
 import _ from "lodash";
 import { Link } from "react-router-dom";
 import { paginate } from "../utils/paginate";
@@ -22,10 +23,8 @@ class Foods extends Component {
   };
 
   async componentDidMount() {
-    const { data: foods } = await axios.get("http://localhost:8000/api/foods");
-    const { data: categories } = await axios.get(
-      "http://localhost:8000/api/categories"
-    );
+    const { data: foods } = await http.get(config.apiEndpointFoods);
+    const { data: categories } = await http.get(config.apiEndpointCategories);
     this.setState({ categories: [DEFAULT_CATEGORY, ...categories], foods });
   }
 
@@ -40,7 +39,7 @@ class Foods extends Component {
   handleDelete = async (food) => {
     const foods = this.state.foods.filter((f) => f._id !== food._id);
     this.setState({ foods });
-    await axios.delete(`http://localhost:8000/api/foods/${food._id}`);
+    await http.delete(config.apiEndpointFoods, food._id);
   };
 
   handleSearch = (searchQuery) =>
@@ -95,6 +94,7 @@ class Foods extends Component {
   }
 
   render() {
+    console.log(this.props);
     const {
       pageSize,
       selectedPage,
@@ -120,9 +120,11 @@ class Foods extends Component {
           />
         </div>
         <div className="col">
-          <Link className="btn btn-primary mb-3" to="/foods/new">
-            New Food
-          </Link>
+          {this.props.user && (
+            <Link className="btn btn-primary mb-3" to="/foods/new">
+              New Food
+            </Link>
+          )}
           <p>Showing {filteredCount} foods in the database.</p>
           <SearchBox value={searchQuery} onChange={this.handleSearch} />
           <FoodsTable

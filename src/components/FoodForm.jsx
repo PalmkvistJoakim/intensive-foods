@@ -1,5 +1,6 @@
 import React from "react";
-import axios from "axios";
+import http from "../services/httpService";
+import config from "../services/config.json";
 import Joi from "joi";
 import Form from "./common/Form";
 
@@ -24,16 +25,21 @@ class FoodForm extends Form {
     price: Joi.number().required().min(0).max(10).label("Price"),
   });
 
-  async componentDidMount() {
-    const { data: categories } = await axios.get(
-      "http://localhost:8000/api/categories"
-    );
-    this.setState({ categories });
+  componentDidMount() {
+    this.populateCategories();
+    this.populateFood();
+  }
 
+  async populateCategories() {
+    const { data: categories } = await http.get(config.apiEndpointCategories);
+    this.setState({ categories });
+  }
+
+  async populateFood() {
     const id = this.props.match.params.id;
     if (id === "new") return;
 
-    const { data } = await axios.get(`http://localhost:8000/api/foods/${id}`);
+    const { data } = await http.get(`${config.apiEndpointFoods}/${id}`);
     if (!data) return this.props.history.replace("/not-found");
 
     this.setState({ data: this.mapToViewModel(data) });
@@ -61,12 +67,9 @@ class FoodForm extends Form {
   doSubmit = async () => {
     const data = this.database(this.state.data);
     if (this.state.data._id) {
-      await axios.put(
-        `http://localhost:8000/api/foods/${this.state.data._id}`,
-        data
-      );
+      await http.put(`${config.apiEndpointFoods}/${this.state.data._id}`, data);
     } else {
-      await axios.post("http://localhost:8000/api/foods", data);
+      await http.post(config.apiEndpointFoods, data);
     }
     return this.props.history.push("/foods");
   };

@@ -7,21 +7,38 @@ import Orders from "./components/Orders";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import FoodForm from "./components/FoodForm";
+import Logout from "./components/Logout";
+import auth from "./services/authService";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 class App extends Component {
+  state = {
+    user: null,
+  };
+
+  componentDidMount() {
+    this.setState({ user: auth.getCurrentUser() });
+  }
+
   render() {
+    const { user } = this.state;
+
     return (
       <>
-        <NavBar />
+        <NavBar user={user} />
         <div className="container">
           <Switch>
-            <Route path="/foods/:id" component={FoodForm} />
+            <ProtectedRoute path="/foods/:id" component={FoodForm} />
+            <Route
+              path="/foods"
+              render={(props) => <Foods {...props} user={user} />}
+            />
             <Route path="/register" component={RegisterForm} />
             <Route path="/login" component={LoginForm} />
             <Route path="/customers" component={Customers} />
             <Route path="/orders" component={Orders} />
-            <Route path="/foods" component={Foods} />
-            <Route exact path="/" component={Foods} />
+            <Route path="/logout" component={Logout} />
+            <Redirect exact from="/" to="/foods" />
             <Redirect to="/not-found" />
           </Switch>
         </div>
