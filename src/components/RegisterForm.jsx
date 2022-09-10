@@ -20,8 +20,7 @@ class RegisterForm extends Form {
 
   doSubmit = async () => {
     try {
-      const { headers } = await user.register(this.state.data);
-      localStorage.setItem("token", headers["x-auth-token"]);
+      await user.register(this.state.data);
       window.location = "/";
     } catch (error) {
       if (error.response.status === 400) {

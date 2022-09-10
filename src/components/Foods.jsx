@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import http from "../services/httpService";
-import config from "../services/config.json";
+import { getCategories } from "../services/categoryService";
+import { getFoods, deleteFood } from "../services/foodService";
 import _ from "lodash";
 import { Link } from "react-router-dom";
 import { paginate } from "../utils/paginate";
@@ -23,9 +23,10 @@ class Foods extends Component {
   };
 
   async componentDidMount() {
-    const { data: foods } = await http.get(config.apiEndpointFoods);
-    const { data: categories } = await http.get(config.apiEndpointCategories);
-    this.setState({ categories: [DEFAULT_CATEGORY, ...categories], foods });
+    const { data } = await getCategories();
+    const categories = [DEFAULT_CATEGORY, ...data];
+    const { data: foods } = await getFoods();
+    this.setState({ foods, categories });
   }
 
   handleFavor = (food) => {
@@ -37,9 +38,16 @@ class Foods extends Component {
   };
 
   handleDelete = async (food) => {
+    const originalFoods = this.state.foods;
     const foods = this.state.foods.filter((f) => f._id !== food._id);
     this.setState({ foods });
-    await http.delete(config.apiEndpointFoods, food._id);
+
+    try {
+      await deleteFood(food._id);
+    } catch (error) {
+      console.log(error);
+      this.setState({ foods: originalFoods });
+    }
   };
 
   handleSearch = (searchQuery) =>
@@ -94,7 +102,6 @@ class Foods extends Component {
   }
 
   render() {
-    console.log(this.props);
     const {
       pageSize,
       selectedPage,

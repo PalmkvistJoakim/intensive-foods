@@ -1,6 +1,6 @@
 import React from "react";
-import http from "../services/httpService";
-import config from "../services/config.json";
+import { getCategories } from "../services/categoryService";
+import { getFood, saveFood } from "../services/foodService";
 import Joi from "joi";
 import Form from "./common/Form";
 
@@ -31,7 +31,7 @@ class FoodForm extends Form {
   }
 
   async populateCategories() {
-    const { data: categories } = await http.get(config.apiEndpointCategories);
+    const { data: categories } = await getCategories();
     this.setState({ categories });
   }
 
@@ -39,9 +39,8 @@ class FoodForm extends Form {
     const id = this.props.match.params.id;
     if (id === "new") return;
 
-    const { data } = await http.get(`${config.apiEndpointFoods}/${id}`);
+    const { data } = await getFood(id);
     if (!data) return this.props.history.replace("/not-found");
-
     this.setState({ data: this.mapToViewModel(data) });
   }
 
@@ -55,22 +54,8 @@ class FoodForm extends Form {
     };
   }
 
-  database(data) {
-    return {
-      name: data.name,
-      categoryId: data.categoryId,
-      numberInStock: data.numberInStock,
-      price: data.price,
-    };
-  }
-
   doSubmit = async () => {
-    const data = this.database(this.state.data);
-    if (this.state.data._id) {
-      await http.put(`${config.apiEndpointFoods}/${this.state.data._id}`, data);
-    } else {
-      await http.post(config.apiEndpointFoods, data);
-    }
+    await saveFood(this.state.data);
     return this.props.history.push("/foods");
   };
 
